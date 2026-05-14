@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" 
+        content="width=device-width">
+  <title>ShopEasy — DevOps Project</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;
+         background:#f0f2f5}
+    header{background:#1a1a2e;color:white;
+           padding:16px 32px;
+           display:flex;
+           justify-content:space-between;
+           align-items:center}
+    header h1{font-size:24px}
+    .badge{background:#e94560;
+           padding:4px 12px;
+           border-radius:20px;
+           font-size:12px}
+    .container{max-width:1200px;
+               margin:30px auto;padding:0 20px}
+    .stats{display:grid;
+           grid-template-columns:repeat(3,1fr);
+           gap:16px;margin-bottom:30px}
+    .stat-card{background:white;
+               padding:20px;border-radius:8px;
+               text-align:center;
+               box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    .stat-card h3{font-size:28px;
+                  color:#1a1a2e}
+    .stat-card p{color:#888;font-size:14px}
+    h2{margin-bottom:20px;color:#1a1a2e}
+    .products{display:grid;
+              grid-template-columns:
+              repeat(auto-fill,minmax(200px,1fr));
+              gap:20px}
+    .card{background:white;border-radius:8px;
+          padding:16px;
+          box-shadow:0 2px 8px rgba(0,0,0,.1);
+          transition:transform .2s}
+    .card:hover{transform:translateY(-4px)}
+    .card h3{font-size:15px;margin-bottom:8px}
+    .card p{color:#888;font-size:12px;
+            margin-bottom:12px}
+    .price{font-size:20px;font-weight:bold;
+           color:#e94560}
+    .btn{display:block;margin-top:12px;
+         padding:10px;background:#1a1a2e;
+         border:none;border-radius:4px;
+         cursor:pointer;font-weight:bold;
+         width:100%;color:white}
+    .btn:hover{background:#e94560}
+    #toast{position:fixed;bottom:20px;
+           right:20px;background:#1a1a2e;
+           color:white;padding:12px 24px;
+           border-radius:8px;display:none;
+           font-weight:bold}
+    .section{background:white;
+             border-radius:8px;padding:24px;
+             margin-top:30px;
+             box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    input{width:100%;padding:10px;
+          margin-bottom:12px;
+          border:1px solid #ddd;
+          border-radius:4px}
+    footer{text-align:center;
+           padding:20px;color:#888;
+           margin-top:30px;font-size:13px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>🛒 ShopEasy</h1>
+  <span class="badge">DevOps Project v1.0</span>
+</header>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <h3 id="total-products">0</h3>
+      <p>Total Products</p>
+    </div>
+    <div class="stat-card">
+      <h3 id="cart-count">0</h3>
+      <p>Cart Items</p>
+    </div>
+    <div class="stat-card">
+      <h3 id="api-status">⏳</h3>
+      <p>API Status</p>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <h2>🛍️ Products</h2>
+  <div class="products" id="products">
+    <p>Loading...</p>
+  </div>
+
+  <!-- Add Product -->
+  <div class="section">
+    <h2>➕ Add Product</h2>
+    <input id="pname" placeholder="Product name"/>
+    <input id="pprice" placeholder="Price (₹)" 
+           type="number"/>
+    <input id="pdesc" placeholder="Description"/>
+    <button class="btn" onclick="addProduct()">
+      Add Product
+    </button>
+  </div>
+</div>
+
+<div id="toast">✅ Added to cart!</div>
+
+<footer>
+  Built by Shubham Jadhav | 
+  DevOps Mega Project |
+  Docker + K8s + AWS + Terraform
+</footer>
+
+<script>
+const API = 'http://localhost:5000';
+
+async function checkHealth() {
+  try {
+    const r = await fetch(`${API}/health`);
+    const d = await r.json();
+    document.getElementById('api-status')
+      .textContent = '✅';
+  } catch {
+    document.getElementById('api-status')
+      .textContent = '❌';
+  }
+}
+
+async function loadProducts() {
+  try {
+    const r = await fetch(`${API}/products`);
+    const products = await r.json();
+    document.getElementById('total-products')
+      .textContent = products.length;
+    document.getElementById('products')
+      .innerHTML = products.map(p => `
+      <div class="card">
+        <h3>${p.name}</h3>
+        <p>${p.description}</p>
+        <div class="price">₹${p.price}</div>
+        <button class="btn" 
+          onclick="addCart(${p.id})">
+          Add to Cart
+        </button>
+      </div>`).join('');
+  } catch(e) {
+    document.getElementById('products')
+      .innerHTML = '<p>❌ API not reachable</p>';
+  }
+}
+
+async function addCart(id) {
+  await fetch(`${API}/cart`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      product_id: id, quantity: 1})
+  });
+  const count = parseInt(
+    document.getElementById('cart-count')
+      .textContent) + 1;
+  document.getElementById('cart-count')
+    .textContent = count;
+  const toast = document.getElementById('toast');
+  toast.style.display = 'block';
+  setTimeout(() => toast.style.display='none',
+    2000);
+}
+
+async function addProduct() {
+  const name = document.getElementById(
+    'pname').value;
+  const price = document.getElementById(
+    'pprice').value;
+  const desc = document.getElementById(
+    'pdesc').value;
+  if (!name || !price) {
+    alert('Please fill name and price!');
+    return;
+  }
+  await fetch(`${API}/products`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      name, price, description: desc})
+  });
+  loadProducts();
+}
+
+// Initialize
+checkHealth();
+loadProducts();
+</script>
+</body>
+</html>
