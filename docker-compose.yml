@@ -1,0 +1,48 @@
+
+services:
+
+  # Backend Service
+  backend:
+    build:
+      context: ./app/backend
+      dockerfile: Dockerfile.backend
+    container_name: ecommerce-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - db_data:/app
+    restart: always
+    networks:
+      - ecommerce-network
+    environment:
+      - FLASK_ENV=production
+    healthcheck:
+      test: ["CMD", "curl", "-f",
+             "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile.frontend
+    container_name: ecommerce-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+    networks:
+      - ecommerce-network
+
+# Named volume for database
+volumes:
+  db_data:
+
+# Custom network
+networks:
+  ecommerce-network:
+    driver: bridge
