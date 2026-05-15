@@ -5,7 +5,7 @@ import sqlite3
 app = Flask(__name__)
 CORS(app)
 
-DB = 'database.db'
+DB = '/tem/database.db'
 
 def get_db():
     conn = sqlite3.connect('database.db')
@@ -95,7 +95,7 @@ def add_cart():
     return jsonify({'message': 'Added'}), 201
 with app.app_context():
     init_db()
-    
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0',
             port=5000, debug=True)

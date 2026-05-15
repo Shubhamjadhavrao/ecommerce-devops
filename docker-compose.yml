@@ -10,7 +10,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - db_data:/app
+      - db_data:/app/data
     restart: always
     networks:
       - ecommerce-network
