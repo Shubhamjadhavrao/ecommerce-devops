@@ -2,39 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" 
-        content="width=device-width">
+  <meta name="viewport" content="width=device-width">
   <title>ShopEasy — DevOps Project</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,sans-serif;
-         background:#f0f2f5}
+    body{font-family:Arial,sans-serif;background:#f0f2f5}
     header{background:#1a1a2e;color:white;
            padding:16px 32px;
-           display:flex;
-           justify-content:space-between;
+           display:flex;justify-content:space-between;
            align-items:center}
     header h1{font-size:24px}
-    .badge{background:#e94560;
-           padding:4px 12px;
-           border-radius:20px;
-           font-size:12px}
+    .cart-icon{background:#e94560;
+               padding:8px 16px;
+               border-radius:20px;
+               cursor:pointer;
+               font-size:14px;
+               font-weight:bold;
+               border:none;color:white}
     .container{max-width:1200px;
                margin:30px auto;padding:0 20px}
     .stats{display:grid;
            grid-template-columns:repeat(3,1fr);
            gap:16px;margin-bottom:30px}
-    .stat-card{background:white;
-               padding:20px;border-radius:8px;
-               text-align:center;
+    .stat-card{background:white;padding:20px;
+               border-radius:8px;text-align:center;
                box-shadow:0 2px 8px rgba(0,0,0,.1)}
-    .stat-card h3{font-size:28px;
-                  color:#1a1a2e}
+    .stat-card h3{font-size:28px;color:#1a1a2e}
     .stat-card p{color:#888;font-size:14px}
     h2{margin-bottom:20px;color:#1a1a2e}
     .products{display:grid;
-              grid-template-columns:
-              repeat(auto-fill,minmax(200px,1fr));
+              grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
               gap:20px}
     .card{background:white;border-radius:8px;
           padding:16px;
@@ -42,39 +39,101 @@
           transition:transform .2s}
     .card:hover{transform:translateY(-4px)}
     .card h3{font-size:15px;margin-bottom:8px}
-    .card p{color:#888;font-size:12px;
-            margin-bottom:12px}
-    .price{font-size:20px;font-weight:bold;
-           color:#e94560}
-    .btn{display:block;margin-top:12px;
-         padding:10px;background:#1a1a2e;
-         border:none;border-radius:4px;
-         cursor:pointer;font-weight:bold;
-         width:100%;color:white}
+    .card p{color:#888;font-size:12px;margin-bottom:12px}
+    .price{font-size:20px;font-weight:bold;color:#e94560}
+    .btn{display:block;margin-top:12px;padding:10px;
+         background:#1a1a2e;border:none;
+         border-radius:4px;cursor:pointer;
+         font-weight:bold;width:100%;color:white}
     .btn:hover{background:#e94560}
-    #toast{position:fixed;bottom:20px;
-           right:20px;background:#1a1a2e;
-           color:white;padding:12px 24px;
-           border-radius:8px;display:none;
-           font-weight:bold}
-    .section{background:white;
-             border-radius:8px;padding:24px;
-             margin-top:30px;
+    .btn-add{background:#e94560}
+    .section{background:white;border-radius:8px;
+             padding:24px;margin-top:30px;
              box-shadow:0 2px 8px rgba(0,0,0,.1)}
     input{width:100%;padding:10px;
           margin-bottom:12px;
-          border:1px solid #ddd;
-          border-radius:4px}
-    footer{text-align:center;
-           padding:20px;color:#888;
-           margin-top:30px;font-size:13px}
+          border:1px solid #ddd;border-radius:4px}
+
+    /* Cart Modal */
+    .modal-overlay{display:none;position:fixed;
+                   top:0;left:0;width:100%;height:100%;
+                   background:rgba(0,0,0,0.5);
+                   z-index:1000;
+                   justify-content:center;
+                   align-items:center}
+    .modal-overlay.active{display:flex}
+    .modal{background:white;border-radius:12px;
+           padding:24px;width:90%;max-width:500px;
+           max-height:80vh;overflow-y:auto}
+    .modal-header{display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  margin-bottom:20px}
+    .modal-header h2{color:#1a1a2e}
+    .close-btn{background:none;border:none;
+               font-size:24px;cursor:pointer;
+               color:#888}
+    .cart-item{display:flex;
+               justify-content:space-between;
+               align-items:center;
+               padding:12px 0;
+               border-bottom:1px solid #eee}
+    .cart-item-name{font-weight:bold;color:#1a1a2e}
+    .cart-item-detail{font-size:12px;color:#888}
+    .cart-item-price{color:#e94560;font-weight:bold}
+    .cart-total{margin-top:20px;padding:16px;
+                background:#f0f2f5;border-radius:8px;
+                display:flex;
+                justify-content:space-between;
+                align-items:center}
+    .cart-total h3{color:#1a1a2e}
+    .cart-total span{font-size:24px;
+                     font-weight:bold;color:#e94560}
+    .empty-cart{text-align:center;
+                padding:40px;color:#888}
+    .empty-cart p{font-size:48px;margin-bottom:12px}
+
+    /* Toast */
+    #toast{position:fixed;bottom:20px;right:20px;
+           background:#1a1a2e;color:white;
+           padding:12px 24px;border-radius:8px;
+           display:none;font-weight:bold;
+           z-index:2000}
+
+    footer{text-align:center;padding:20px;
+           color:#888;margin-top:30px;font-size:13px}
   </style>
 </head>
 <body>
+
 <header>
   <h1>🛒 ShopEasy</h1>
-  <span class="badge">DevOps Project v1.0</span>
+  <button class="cart-icon" onclick="openCart()">
+    🛒 Cart (<span id="cart-count">0</span>)
+  </button>
 </header>
+
+<!-- Cart Modal -->
+<div class="modal-overlay" id="cartModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🛒 Your Cart</h2>
+      <button class="close-btn" 
+              onclick="closeCart()">✕</button>
+    </div>
+    <div id="cart-items">
+      <div class="empty-cart">
+        <p>🛒</p>
+        <p>Cart is empty!</p>
+      </div>
+    </div>
+    <div class="cart-total" id="cart-total"
+         style="display:none">
+      <h3>Total Amount:</h3>
+      <span id="total-amount">₹0</span>
+    </div>
+  </div>
+</div>
 
 <div class="container">
   <!-- Stats -->
@@ -84,7 +143,7 @@
       <p>Total Products</p>
     </div>
     <div class="stat-card">
-      <h3 id="cart-count">0</h3>
+      <h3 id="cart-stat">0</h3>
       <p>Cart Items</p>
     </div>
     <div class="stat-card">
@@ -101,12 +160,13 @@
 
   <!-- Add Product -->
   <div class="section">
-    <h2>➕ Add Product</h2>
+    <h2>➕ Add New Product</h2>
     <input id="pname" placeholder="Product name"/>
-    <input id="pprice" placeholder="Price (₹)" 
-           type="number"/>
+    <input id="pprice" 
+           placeholder="Price (₹)" type="number"/>
     <input id="pdesc" placeholder="Description"/>
-    <button class="btn" onclick="addProduct()">
+    <button class="btn btn-add" 
+            onclick="addProduct()">
       Add Product
     </button>
   </div>
@@ -115,7 +175,7 @@
 <div id="toast">✅ Added to cart!</div>
 
 <footer>
-  Built by Shubham Jadhav | 
+  Built by Shubham Jadhav |
   DevOps Mega Project |
   Docker + K8s + AWS + Terraform
 </footer>
@@ -123,6 +183,26 @@
 <script>
 const API = 'http://13.201.48.46:5000';
 
+// Open cart modal
+function openCart() {
+  document.getElementById('cartModal')
+    .classList.add('active');
+  loadCart();
+}
+
+// Close cart modal
+function closeCart() {
+  document.getElementById('cartModal')
+    .classList.remove('active');
+}
+
+// Close modal when clicking outside
+document.getElementById('cartModal')
+  .addEventListener('click', function(e) {
+    if(e.target === this) closeCart();
+  });
+
+// Check API health
 async function checkHealth() {
   try {
     const r = await fetch(`${API}/health`);
@@ -135,6 +215,7 @@ async function checkHealth() {
   }
 }
 
+// Load products
 async function loadProducts() {
   try {
     const r = await fetch(`${API}/products`);
@@ -147,9 +228,9 @@ async function loadProducts() {
         <h3>${p.name}</h3>
         <p>${p.description}</p>
         <div class="price">₹${p.price}</div>
-        <button class="btn" 
-          onclick="addCart(${p.id})">
-          Add to Cart
+        <button class="btn"
+          onclick="addCart(${p.id},'${p.name}')">
+          🛒 Add to Cart
         </button>
       </div>`).join('');
   } catch(e) {
@@ -158,24 +239,95 @@ async function loadProducts() {
   }
 }
 
-async function addCart(id) {
-  await fetch(`${API}/cart`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      product_id: id, quantity: 1})
-  });
-  const count = parseInt(
+// Load cart items
+async function loadCart() {
+  try {
+    const r = await fetch(`${API}/cart`);
+    const items = await r.json();
+
+    if(items.length === 0) {
+      document.getElementById('cart-items')
+        .innerHTML = `
+        <div class="empty-cart">
+          <p>🛒</p>
+          <p>Cart is empty!</p>
+        </div>`;
+      document.getElementById('cart-total')
+        .style.display = 'none';
+      return;
+    }
+
+    // Show cart items
+    document.getElementById('cart-items')
+      .innerHTML = items.map(item => `
+      <div class="cart-item">
+        <div>
+          <div class="cart-item-name">
+            ${item.name}
+          </div>
+          <div class="cart-item-detail">
+            ₹${item.price} × ${item.quantity}
+          </div>
+        </div>
+        <div class="cart-item-price">
+          ₹${item.total}
+        </div>
+      </div>`).join('');
+
+    // Calculate total
+    const total = items.reduce(
+      (sum, item) => sum + item.total, 0);
+    document.getElementById('total-amount')
+      .textContent = `₹${total}`;
+    document.getElementById('cart-total')
+      .style.display = 'flex';
+
+    // Update cart count
+    const count = items.reduce(
+      (sum, item) => sum + item.quantity, 0);
     document.getElementById('cart-count')
-      .textContent) + 1;
-  document.getElementById('cart-count')
-    .textContent = count;
-  const toast = document.getElementById('toast');
-  toast.style.display = 'block';
-  setTimeout(() => toast.style.display='none',
-    2000);
+      .textContent = count;
+    document.getElementById('cart-stat')
+      .textContent = count;
+
+  } catch(e) {
+    console.error('Cart error:', e);
+  }
 }
 
+// Add to cart
+async function addCart(id, name) {
+  try {
+    await fetch(`${API}/cart`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        product_id: id, quantity: 1})
+    });
+
+    // Update cart count immediately
+    const count = parseInt(
+      document.getElementById(
+        'cart-count').textContent) + 1;
+    document.getElementById('cart-count')
+      .textContent = count;
+    document.getElementById('cart-stat')
+      .textContent = count;
+
+    // Show toast
+    const toast = document.getElementById('toast');
+    toast.textContent = `✅ ${name} added to cart!`;
+    toast.style.display = 'block';
+    setTimeout(() => 
+      toast.style.display = 'none', 2000);
+
+  } catch(e) {
+    alert('Error adding to cart!');
+  }
+}
+
+// Add new product
 async function addProduct() {
   const name = document.getElementById(
     'pname').value;
@@ -183,22 +335,39 @@ async function addProduct() {
     'pprice').value;
   const desc = document.getElementById(
     'pdesc').value;
-  if (!name || !price) {
+
+  if(!name || !price) {
     alert('Please fill name and price!');
     return;
   }
+
   await fetch(`${API}/products`, {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({
       name, price, description: desc})
   });
+
+  // Clear inputs
+  document.getElementById('pname').value = '';
+  document.getElementById('pprice').value = '';
+  document.getElementById('pdesc').value = '';
+
+  // Reload products
   loadProducts();
+
+  // Show toast
+  const toast = document.getElementById('toast');
+  toast.textContent = '✅ Product added!';
+  toast.style.display = 'block';
+  setTimeout(() => 
+    toast.style.display = 'none', 2000);
 }
 
 // Initialize
 checkHealth();
 loadProducts();
+loadCart();
 </script>
 </body>
 </html>
