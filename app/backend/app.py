@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +14,7 @@ def get_db():
     return conn
 
 def init_db():
+    os.makedirs('/app/data', exist_ok=True)
     conn = get_db()
     conn.execute('''CREATE TABLE IF NOT EXISTS 
         products (
@@ -93,7 +95,7 @@ def add_cart():
     conn.commit()
     conn.close()
     return jsonify({'message': 'Added'}), 201
-
+init_db()
 if __name__ == '__main__':
     app.run(host='0.0.0.0',
             port=5000, debug=True)
