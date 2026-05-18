@@ -5,7 +5,7 @@ import sqlite3
 app = Flask(__name__)
 CORS(app)
 
-DB = '/tmp/database.db'
+DB = '/app/data/ecommerce.db'
 
 def get_db():
     conn = sqlite3.connect(DB)
